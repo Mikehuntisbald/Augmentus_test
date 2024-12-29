@@ -1,0 +1,8 @@
+
+# Ignore build and debug files
+bin/
+obj/
+*.user
+*.suo
+*.log
+*.tmp

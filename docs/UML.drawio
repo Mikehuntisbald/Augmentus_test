@@ -1,0 +1,14 @@
+
+Basic UML Structure for EdgeDetectionBackend:
+
+Classes:
+1. Sobel
+   - Method: ApplySobel(Bitmap inputImage) -> Bitmap
+   - Private Method: ConvertToGrayscale(Bitmap inputImage) -> Bitmap
+
+2. Prewitt
+   - Method: ApplyPrewitt(Bitmap inputImage) -> Bitmap
+   - Private Method: ConvertToGrayscale(Bitmap inputImage) -> Bitmap
+
+Relationships:
+- Both Sobel and Prewitt classes are independent and encapsulate their respective algorithms.
