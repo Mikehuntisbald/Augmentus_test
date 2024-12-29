@@ -1,38 +1,30 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
-using EdgeDetectionBackend.EdgeDetection;
+using System.Windows.Forms;
 
 namespace EdgeDetectionBackend
 {
     class Program
     {
+        [STAThread] // MUST add
         static void Main(string[] args)
         {
-            Console.WriteLine("Edge Detection Backend");
+            Console.WriteLine("Edge Detection Backend with Interactive File Selection");
             Console.WriteLine("-----------------------------------");
 
             try
             {
-                // Get user input for image paths and operator selection
-                Console.Write("Enter the path of the input image: ");
-                string inputImagePath = Console.ReadLine();
-
-                // Check if the input image exists
-                if (!File.Exists(inputImagePath))
+                string inputImagePath = SelectInputFile();
+                if (string.IsNullOrEmpty(inputImagePath))
                 {
-                    Console.WriteLine("Error: The specified input image file does not exist. Please check the path.");
+                    Console.WriteLine("No input file selected. Exiting...");
                     return;
                 }
 
-                Console.Write("Enter the path to save the output image (including file name): ");
-                string outputImagePath = Console.ReadLine();
-
-                // Check if the output directory exists
-                string outputDirectory = Path.GetDirectoryName(outputImagePath);
-                if (!Directory.Exists(outputDirectory))
+                string outputImagePath = SelectSaveFile();
+                if (string.IsNullOrEmpty(outputImagePath))
                 {
-                    Console.WriteLine("Error: The specified output directory does not exist. Please check the path.");
+                    Console.WriteLine("No output file path selected. Exiting...");
                     return;
                 }
 
@@ -47,52 +39,28 @@ namespace EdgeDetectionBackend
                 }
 
                 // Load input image
-                Bitmap inputImage;
-                try
-                {
-                    inputImage = new Bitmap(inputImagePath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: Unable to load the input image. Details: {ex.Message}");
-                    return;
-                }
+                Bitmap inputImage = new Bitmap(inputImagePath);
 
-                // Perform edge detection based on user choice
+                // Choose operator and apply edge detection
                 Bitmap outputImage;
-                try
+                switch (choice)
                 {
-                    switch (choice)
-                    {
-                        case 1:
-                            Console.WriteLine("Applying Sobel operator...");
-                            outputImage = Sobel.ApplySobel(inputImage);
-                            break;
-                        case 2:
-                            Console.WriteLine("Applying Prewitt operator...");
-                            outputImage = Prewitt.ApplyPrewitt(inputImage);
-                            break;
-                        default:
-                            Console.WriteLine("Error: Invalid operator choice.");
-                            return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: Failed to apply the edge detection algorithm. Details: {ex.Message}");
-                    return;
+                    case 1:
+                        Console.WriteLine("Applying Sobel operator...");
+                        outputImage = EdgeDetection.Sobel.ApplySobel(inputImage);
+                        break;
+                    case 2:
+                        Console.WriteLine("Applying Prewitt operator...");
+                        outputImage = EdgeDetection.Prewitt.ApplyPrewitt(inputImage);
+                        break;
+                    default:
+                        Console.WriteLine("Error: Invalid operator choice.");
+                        return;
                 }
 
-                // Save the output image
-                try
-                {
-                    outputImage.Save(outputImagePath);
-                    Console.WriteLine($"Output image saved to: {outputImagePath}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: Unable to save the output image. Details: {ex.Message}");
-                }
+                // Save output image
+                outputImage.Save(outputImagePath);
+                Console.WriteLine($"Output image saved to: {outputImagePath}");
             }
             catch (Exception ex)
             {
@@ -101,6 +69,39 @@ namespace EdgeDetectionBackend
 
             Console.WriteLine("Process complete. Press any key to exit...");
             Console.ReadKey();
+        }
+
+        /// Open a window to select the input image
+        private static string SelectInputFile()
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "Select an Input Image";
+                openFileDialog.Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    return openFileDialog.FileName;
+                }
+            }
+            return null;
+        }
+
+        /// Open a window to select the save location
+
+        private static string SelectSaveFile()
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Title = "Select Save Location";
+                saveFileDialog.Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png";
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    return saveFileDialog.FileName;
+                }
+            }
+            return null;
         }
     }
 }
